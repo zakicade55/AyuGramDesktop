@@ -45,7 +45,7 @@ jobs:
         linuxdeployqt AppDir/usr/share/applications/*.desktop -appimage
 
     - name: Upload AppImage
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: AyuGram-AppImage
         path: build/*.AppImage
