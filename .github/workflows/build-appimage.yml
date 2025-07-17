@@ -1,15 +1,17 @@
 name: Build AyuGram AppImage
 
 on:
-  workflow_dispatch:  # manual trigger
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout the repo
+    - name: Checkout the repo and submodules
       uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - name: Install dependencies
       run: |
