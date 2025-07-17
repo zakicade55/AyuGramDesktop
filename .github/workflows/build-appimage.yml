@@ -1,0 +1,51 @@
+name: Build AyuGram AppImage
+
+on:
+  workflow_dispatch:  # manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repo
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          git cmake g++ qtbase5-dev qttools5-dev-tools \
+          qttools5-dev qtbase5-private-dev libglib2.0-dev \
+          libssl-dev liblzma-dev zlib1g-dev libavformat-dev \
+          libswscale-dev libvpx-dev libopenal-dev libminizip-dev \
+          libopus-dev pkg-config patchelf appstream appstream-util \
+          wget desktop-file-utils fuse libfuse2
+
+    - name: Build AyuGram
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        make -j$(nproc)
+
+    - name: Download linuxdeploy and linuxdeployqt
+      run: |
+        wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-x86_64.AppImage
+        chmod +x linuxdeploy*.AppImage
+        sudo mv linuxdeploy-x86_64.AppImage /usr/local/bin/linuxdeploy
+        sudo mv linuxdeployqt-x86_64.AppImage /usr/local/bin/linuxdeployqt
+
+    - name: Make AppDir and generate AppImage
+      run: |
+        cd build
+        mkdir -p AppDir/usr/bin
+        cp AyuGram AppDir/usr/bin/
+        linuxdeployqt AppDir/usr/share/applications/*.desktop -appimage
+
+    - name: Upload AppImage
+      uses: actions/upload-artifact@v3
+      with:
+        name: AyuGram-AppImage
+        path: build/*.AppImage
